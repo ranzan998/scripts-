@@ -9,3 +9,4 @@ coordinates, attributes etc, there by ferret saves a lot of time and effort.
 This repo is to show case how scripts from other softwares/programming language can be called through python scripts, so as to have 
 best of every world. flexibility of python + reliability of Ferret + computational feasibility of Fortran.
 
+# by extension, more useful scripts are added henceforth june/09/23
