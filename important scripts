@@ -1,0 +1,22 @@
+#Code to add missing (in between) timesteps and corresponding values for a oned data, in order to make dataset continuous
+
+import numpy as np
+import xarray as xr
+
+# Assuming your original dataset is named 'data' and has a 'time' dimension
+
+# Step 1: Determine the expected time steps range or frequency
+expected_time_range = pd.date_range(start=data['time'].min(), end=data['time'].max(), freq='1H')
+
+# Step 2: Create a new empty dataset with the expected time steps
+empty_data = xr.Dataset({'dummy_var': (['time'], np.zeros(len(expected_time_range)))},
+                        coords={'time': expected_time_range})
+
+# Step 3: Merge the original dataset with the new empty dataset
+merged_data = xr.merge([data, empty_data])
+
+# Step 4: Reindex the merged dataset to align with the expected time steps
+reindexed_data = merged_data.reindex(time=expected_time_range)
+
+# Step 5: Fill missing values with NaN
+filled_data = reindexed_data.interpolate_na(dim='time', method='nearest', fill_value=np.nan)
