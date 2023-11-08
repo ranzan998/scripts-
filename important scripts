@@ -1,4 +1,4 @@
-#Code to add missing (in between) timesteps and corresponding values for a oned data, in order to make dataset continuous
+#Code to add missing (in between) timesteps and corresponding values for a one-D data, in order to make dataset continuous
 
 import numpy as np
 import xarray as xr
@@ -20,3 +20,69 @@ reindexed_data = merged_data.reindex(time=expected_time_range)
 
 # Step 5: Fill missing values with NaN
 filled_data = reindexed_data.interpolate_na(dim='time', method='nearest', fill_value=np.nan)
+
+
+
+#########################################################################################
+#Removing outliers from a seasonal parameter in a dataset can be done using statistical methods. One common approach is to use the interquartile range (IQR) method. Here's a general guide on how you can achieve this using Python and xarray:
+
+#python
+
+import xarray as xr
+import numpy as np
+
+# Create a sample dataset
+time = pd.date_range('2010-01-01', '2011-12-31', freq='D')
+data = xr.DataArray(np.random.rand(len(time)), coords={'time': time}, dims=('time',))
+
+# Identify the seasonal parameter (e.g., month)
+data['month'] = data['time.month']
+
+# Define a function to remove outliers based on IQR
+def remove_outliers(arr):
+    Q1 = arr.quantile(0.25)
+    Q3 = arr.quantile(0.75)
+    IQR = Q3 - Q1
+    lower_bound = Q1 - 1.5 * IQR
+    upper_bound = Q3 + 1.5 * IQR
+    return arr.where((arr >= lower_bound) & (arr <= upper_bound))
+
+# Apply the function to each season (month in this case)
+filtered_data = data.groupby('month').apply(remove_outliers)
+
+# Drop the temporary 'month' coordinate
+filtered_data = filtered_data.drop('month')
+
+print(filtered_data)
+
+#########################################################################################
+#To remove outliers from a seasonal parameter and replace them with a rolling averaged value if the gap is less than 1 hour in a 10-minute interval dataset, you can use xarray in combination with pandas for the rolling average. Below is an example using synthetic data:
+
+$python
+
+import xarray as xr
+import pandas as pd
+import numpy as np
+
+# Create a sample dataset with synthetic data
+time = pd.date_range('2023-01-01', '2023-01-10', freq='10T')
+data = xr.DataArray(np.random.normal(loc=50, scale=10, size=(len(time))), coords={'time': time}, dims=('time',))
+
+# Add outliers to the dataset
+data[5] = 150
+data[15] = 180
+
+# Define a function to replace outliers with rolling average if the gap is less than 1 hour
+def replace_outliers_with_rolling_avg(arr, window_size=6, max_gap=6):
+    rolling_avg = arr.rolling(time=window_size, min_periods=1).mean()
+    outliers = np.abs(arr - rolling_avg) > max_gap
+    arr[outliers] = rolling_avg[outliers]
+    return arr
+
+# Apply the function to your dataset
+data = replace_outliers_with_rolling_avg(data)
+
+# Print the modified dataset
+print(data)
+
+
