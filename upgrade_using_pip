@@ -1,0 +1,18 @@
+##How to Update All Python Packages
+The following works on linux
+
+Do
+
+$ pip freeze > requirements.txt
+
+Open the text file, replace the == with >=, or have sed do it for you:
+
+$ sed -i 's/==/>=/g' requirements.txt
+
+and execute:
+
+$ pip install -r requirements.txt --upgrade
+
+If you have a problem with a certain package stalling the upgrade (NumPy sometimes), just go to the directory ($),
+comment out the name (add a # before it) and run the upgrade again. You can later uncomment that section back. 
+This is also great for copying Python global environments.
